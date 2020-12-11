@@ -71,15 +71,12 @@ Rcpp::NumericMatrix convert_double_vector(const std::vector< std::vector< double
 #include "read_emissions.h"
 #include "genotype_emissions.h"
 #include "read_input.h"
+#include "read_input_r.h"
 #include "nelder_mead.h"
 #include "golden_search.h"
 #include "bootstrap.h"
 
-// #include "r_functions.h"
-
 using namespace Rcpp;
-
-
 
 // [[Rcpp::export]]
 Rcpp::List run_ancestry_hmm(const Rcpp::NumericMatrix& sample_matrix,
@@ -87,12 +84,6 @@ Rcpp::List run_ancestry_hmm(const Rcpp::NumericMatrix& sample_matrix,
                             const int num_options,
                             const Rcpp::NumericMatrix& genetic_data,
                             bool viterbi) {
-
-
-
-
-
- // Rcout << cmd_line_options.size() << "\n";
 
   const int argc = cmd_line_options.size();
   char* argv[argc];
@@ -105,11 +96,7 @@ Rcpp::List run_ancestry_hmm(const Rcpp::NumericMatrix& sample_matrix,
     char *p = new char[sz];
     std::strcpy(p, s);
     argv[i] = p;
- //   Rcout << p << " "; force_output();
   }
- // Rcout << "\n";
-
-
 
   clock_t t = clock();
   clock_t total = clock() ;
@@ -128,7 +115,7 @@ Rcpp::List run_ancestry_hmm(const Rcpp::NumericMatrix& sample_matrix,
 
   /// get sample ids and ploidy from input file
   Rcout << "\t\t\t\t" << (double) (clock() - t) << " ms\n" << "reading sample ids and ploidy" ; t = clock();
-  read_samples(markov_chain_information,
+  read_samples_r(markov_chain_information,
                  sample_matrix,
                  viterbi) ;
 
@@ -153,20 +140,19 @@ Rcpp::List run_ancestry_hmm(const Rcpp::NumericMatrix& sample_matrix,
   vector<double> recombination_rate ;
   vector<string> chromosomes ;
   /*read_file( options,
+   markov_chain_information,
+   state_list,
+   position,
+   recombination_rate,
+   chromosomes ) ;*/
+
+  read_file_r( options,
              markov_chain_information,
              state_list,
              position,
              recombination_rate,
-             chromosomes ) ;*/
-
-  read_file( options,
-               markov_chain_information,
-               state_list,
-               position,
-               recombination_rate,
-               chromosomes,
-               genetic_data);
-
+             chromosomes,
+             genetic_data);
 
   /// create basic transition information
   Rcout << (double) (clock() - t) << " ms" << endl << "computing transition routes\t\t\t" ; t = clock() ;
@@ -324,9 +310,9 @@ Rcpp::NumericMatrix convert_double_vector(const std::vector< std::vector< double
   Rcpp::NumericMatrix output(nrow, ncol);
 
   for(int i = 0; i < invec.size(); ++i) {
-   for(int j = 0; j < invec[i].size(); ++j) {
-     output(i, j) = invec[i][j];
-   }
+    for(int j = 0; j < invec[i].size(); ++j) {
+      output(i, j) = invec[i][j];
+    }
   }
   return output;
 }

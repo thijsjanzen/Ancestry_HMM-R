@@ -1,18 +1,20 @@
 #ifndef __FACTORIAL_H
 #define __FACTORIAL_H
 
-vector<double> create_factorial () {
+#include <vector>
 
-	vector<double> factorial(1755) ;
-	factorial[0] = 1 ; 
-	double fact = 1 ; 
-	for ( double base = 1 ; base < 1755 ; base ++ ) { 
-		fact *= base ; 
-		factorial[base] = fact ; 
+std::vector<double> create_factorial () {
+
+  std::vector<double> facto(1755) ;
+	facto[0] = 1 ;
+	double fact = 1 ;
+	for ( double base = 1 ; base < 1755 ; base ++ ) {
+		fact *= base ;
+		facto[base] = fact ;
 	}
-	return factorial ; 
+	return facto ;
 }
 
-const vector<double> factorial = create_factorial() ;
+const std::vector<double> factorial_vec = create_factorial() ;
 
 #endif

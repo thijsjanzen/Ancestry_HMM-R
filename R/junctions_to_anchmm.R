@@ -1,7 +1,10 @@
 
 #' converts output from simulations of the junctions package to input for
 #' Ancestry_HMM
-
+#' @param sim_data  output from junctions::sim_phased_unphased
+#' @return list with posterior probabilities, age estimate, and likelihood
+#' @rawNamespace useDynLib(ancestryhmmR)
+#' @rawNamespace import(Rcpp)
 junctions_to_anchmm <- function(sim_data) {
 
   # we need per line:

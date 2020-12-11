@@ -1,7 +1,7 @@
 #ifndef __READ_SAMPLES_R_H
 #define __READ_SAMPLES_R_H
 
-void read_samples(std::vector<markov_chain> &markov_chain_information,
+void read_samples_r(std::vector<markov_chain> &markov_chain_information,
                   const Rcpp::NumericMatrix& m,
                   bool viterbi) {
 

@@ -1,14 +1,14 @@
-Package: rancestry
+Package: ancestryhmmR
 Type: Package
-Title: What the Package Does Using Title Case
-Version: 1.0
+Title: Run the program Ancestry_HMM from within R
+Version: 0.1
 Date: 2020-12-08
 Author: Thijs Janzen
 Maintainer: Thijs Janzen <thijsjanzen@gmail.com>
 Description: More details about what the package does. See
            <http://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file> for
            details on how to write this part.
-License: GPL (>= 2)
-Suggests: tinytest
+License: GPL (>= 3)
 Imports: Rcpp (>= 1.0.5)
 LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 7.1.1
