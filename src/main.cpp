@@ -89,12 +89,13 @@ Rcpp::List run_ancestry_hmm_cpp(const Rcpp::NumericMatrix& sample_matrix,
                             bool viterbi,
                             const Rcpp::NumericVector& pulse1,
                             const Rcpp::NumericVector& pulse2,
+                            const Rcpp::NumericVector& ancestry_proportions,
                             bool use_genome_data) {
 
   const int argc = cmd_line_options.size();
   char* argv[argc];
 
-  Rcout << argc << "\n"; force_output();
+//  Rcout << argc << "\n"; force_output();
 
   if (argc > 1) {
     for(int i = 0; i < cmd_line_options.size(); ++i) {
@@ -112,7 +113,7 @@ Rcpp::List run_ancestry_hmm_cpp(const Rcpp::NumericMatrix& sample_matrix,
 
   // read cmd line
   cmd_line options ;
-  Rcout << "reading command line\n" ; t = clock(); force_output();
+  Rcout << "reading command line" ; t = clock(); force_output();
 
   options.read_cmd_line( argc, &argv[0]);
 
@@ -130,6 +131,21 @@ Rcpp::List run_ancestry_hmm_cpp(const Rcpp::NumericMatrix& sample_matrix,
     options.ancestry_pulses.back().entry_order = options.ancestry_pulses.size() - 1 ;
 
     options.genotype = use_genome_data;
+
+    options.ancestry_proportion.clear() ;
+    int stop = ancestry_proportions[0];
+    float sum = 0 ;
+    for ( int l = 0 ; l < stop ; l ++ ) {
+      options.ancestry_proportion.push_back( ancestry_proportions[l + 1] ) ;
+      sum += options.ancestry_proportion.back() ;
+    }
+
+    //// check that ancestry proportions sum to one
+    if ( sum < 0.9999 || sum > 1.0001 ) {
+      Rcpp::Rcout << "\n\n\t\t ERROR: ancestry proportions must sum to one\n\n" ;
+      print_usage() ;
+      Rcpp::stop("\n\n\t\t ERROR: ancestry proportions must sum to one\n\n");
+    }
   }
 
   /// chain objects for each sample
@@ -303,7 +319,7 @@ Rcpp::List run_ancestry_hmm_cpp(const Rcpp::NumericMatrix& sample_matrix,
                                                 output,
                                                 m) ;
     }
-    Rcpp::Rcout << "converting to NumericMatrix\n"; force_output();
+   // Rcpp::Rcout << "converting to NumericMatrix\n"; force_output();
     probabilities = convert_double_vector(output);
   }
 

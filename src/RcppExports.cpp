@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // run_ancestry_hmm_cpp
-Rcpp::List run_ancestry_hmm_cpp(const Rcpp::NumericMatrix& sample_matrix, Rcpp::StringVector& cmd_line_options, const Rcpp::NumericMatrix& genetic_data, bool viterbi, const Rcpp::NumericVector& pulse1, const Rcpp::NumericVector& pulse2, bool use_genome_data);
-RcppExport SEXP _ancestryhmmR_run_ancestry_hmm_cpp(SEXP sample_matrixSEXP, SEXP cmd_line_optionsSEXP, SEXP genetic_dataSEXP, SEXP viterbiSEXP, SEXP pulse1SEXP, SEXP pulse2SEXP, SEXP use_genome_dataSEXP) {
+Rcpp::List run_ancestry_hmm_cpp(const Rcpp::NumericMatrix& sample_matrix, Rcpp::StringVector& cmd_line_options, const Rcpp::NumericMatrix& genetic_data, bool viterbi, const Rcpp::NumericVector& pulse1, const Rcpp::NumericVector& pulse2, const Rcpp::NumericVector& ancestry_proportions, bool use_genome_data);
+RcppExport SEXP _ancestryhmmR_run_ancestry_hmm_cpp(SEXP sample_matrixSEXP, SEXP cmd_line_optionsSEXP, SEXP genetic_dataSEXP, SEXP viterbiSEXP, SEXP pulse1SEXP, SEXP pulse2SEXP, SEXP ancestry_proportionsSEXP, SEXP use_genome_dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -18,14 +18,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type viterbi(viterbiSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type pulse1(pulse1SEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type pulse2(pulse2SEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type ancestry_proportions(ancestry_proportionsSEXP);
     Rcpp::traits::input_parameter< bool >::type use_genome_data(use_genome_dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(run_ancestry_hmm_cpp(sample_matrix, cmd_line_options, genetic_data, viterbi, pulse1, pulse2, use_genome_data));
+    rcpp_result_gen = Rcpp::wrap(run_ancestry_hmm_cpp(sample_matrix, cmd_line_options, genetic_data, viterbi, pulse1, pulse2, ancestry_proportions, use_genome_data));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_ancestryhmmR_run_ancestry_hmm_cpp", (DL_FUNC) &_ancestryhmmR_run_ancestry_hmm_cpp, 7},
+    {"_ancestryhmmR_run_ancestry_hmm_cpp", (DL_FUNC) &_ancestryhmmR_run_ancestry_hmm_cpp, 8},
     {NULL, NULL, 0}
 };
 
