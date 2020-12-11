@@ -2,14 +2,14 @@
 #define __READ_CMD_LINE_H
 
 void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
-    
+
     ///defaults
     ancestral_fixed = false ;                  /// set to true for qtl or experimental evolution application if ancestral genotypes are known and at fixed frequencies.
-    
+
     /// ideally we recommend pruning LD in advance
     minimum_distance = 0 ;                          /// minimum distance in morgans between sites to consider
     ne = 2e4 ;                                      /// actually 2ne
-    
+
     // time params to bound our search
     t_max = 10000 ;
     t_min = 1 ;
@@ -17,27 +17,27 @@ void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
     p_min = 0.00001 ;
     t_length = 0.8 ;
     p_length = 0.8 ;
-    
+
     /// if set, we clear once
     bool clear = false ;
-    
+
     /// error rates
     error_rates = false ;
-    
+
     // the default behavior is a single pulse of ancestry 1 into ancestry 0
     ancestry_pulses.resize( 2 ) ;
     ancestry_pulses[0].type = 0 ;
     ancestry_pulses[1].type = 1 ;
-    
+
     /// default is 50:50 with single pulse of 1 into 0
     ancestry_pulses[0].proportion = 0.5 ;
     ancestry_pulses[1].proportion = 0.5 ;
     ancestry_pulses[0].proportion_fixed = true ;
     ancestry_pulses[1].proportion_fixed = true ;
-    
+
     /// also the ancestry proportions are known
     ancestry_proportion.assign(2,0.5) ;
-    
+
     /// time is not fixed by default, pulse of 1 into 0
     /// does not matter, really since 0>1 would be identical in formulation
     ancestry_pulses[0].time = 3000 ;
@@ -48,41 +48,42 @@ void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
     /// end parameter this will be in lnl units
     /// i.e. must obtain <= this amount of improvement between all vertices to quit
     tolerance = 1e-5 ;
-    
+
     /// restart number
     n_restarts = -1 ;
 
     /// per site per read error rate
     error_rate = 0.01 ;
-    
+
     /// genotype data rather than read data?
     genotype = false ;
 
     // viterbi
     viterbi = false ;
-    
+
     /// output pulses rather than ancestry counts
     output_pulses = true ;
-    
+
     /// set output precision
     precision = 10 ;
-    
+
     /// sample file
     sample_file = "null" ;
-    
+
     // intput file
     input_file = "null" ;
-    
+
     /// bootstraps
     n_bootstraps = 0 ;
     block_size = 0 ;
-    
+
+  if (argc < 1) return;
 	/// accept command line parameters
 	for (int i=1; i<argc; i++) {
-        
+
         /// set this first, unless defaults are used
         if ( strcmp(argv[i],"-p") == 0 ) {
-            
+
             /// if we deviate from default, clear the vector once
             if ( clear == false ) {
                 ancestry_pulses.clear() ;
@@ -94,7 +95,7 @@ void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
             new_ancestry_pulse.type = atoi(argv[++i]) ;
             new_ancestry_pulse.time = atof(argv[++i]) ;
             new_ancestry_pulse.proportion = atof(argv[++i]) ;
-            
+
             // if time is set, we are not estimating it
             ///// set time with a negative number to provide the starting guess for this parameter
             if ( new_ancestry_pulse.time > 0 ) {
@@ -104,7 +105,7 @@ void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
                 new_ancestry_pulse.time = new_ancestry_pulse.time * -1 ;
                 new_ancestry_pulse.time_fixed = false ;
             }
-            
+
             // if proporion is set, we are not estimating it
             ////// set proporiton with a negative number to provide the starting guess for this parameter
             if ( new_ancestry_pulse.proportion > 0 ) {
@@ -117,7 +118,7 @@ void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
             ancestry_pulses.push_back( new_ancestry_pulse ) ;
             ancestry_pulses.back().entry_order = ancestry_pulses.size() - 1 ;
         }
-    
+
         //// for each ancestry type, set the total ancestry fraction
         //// this must be set and equal to all the ancestry types listed above
         if ( strcmp(argv[i],"-a") == 0 ) {
@@ -128,47 +129,46 @@ void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
                 ancestry_proportion.push_back( atof(argv[++i]) ) ;
                 sum += ancestry_proportion.back() ;
             }
-            
+
             //// check that ancestry proportions sum to one
             if ( sum < 0.9999 || sum > 1.0001 ) {
-                cerr << "\n\n\t\t ERROR: ancestry proportions must sum to one\n\n" ;
+                Rcpp::Rcout << "\n\n\t\t ERROR: ancestry proportions must sum to one\n\n" ;
                 print_usage() ;
                 exit(1) ;
             }
         }
-        
+
         if ( strcmp(argv[i],"--help") == 0 ) {
             print_usage() ;
-            exit(1) ; 
+            exit(1) ;
         }
-        
+
         if ( strcmp(argv[i],"-g") == 0 ) {
             genotype = true ;
         }
-        
+
         if ( strcmp(argv[i],"--output-ancestry") == 0 ) {
             output_pulses = false ;
         }
         if ( strcmp(argv[i],"--precision") == 0 ) {
+            Rcpp::Rcout << "precision option not available in R version\n";
             precision = atoi(argv[++i]) ;
-            cout.precision(precision) ;
-            cerr.precision(precision) ;
         }
-        
+
         if ( strcmp(argv[i],"-v") == 0 ) {
             viterbi = true ;
         }
-        
+
         if ( strcmp(argv[i],"-r") == 0 ) {
             n_restarts = atoi(argv[++i]) ;
         }
-        
+
         /// bootstraps supplied as '-b <int, number> <int, block size>
         if ( strcmp(argv[i],"-b") == 0 ) {
             n_bootstraps = atoi(argv[++i]) ;
             block_size = atoi(argv[++i]) ;
         }
-        
+
         /// to bound possible pulse times
         if ( strcmp(argv[i],"--tmax") == 0 ) {
             t_max = atof(argv[++i]) ;
@@ -195,7 +195,7 @@ void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
             error_rate = atof(argv[++i]) ;
         }
         if ( strcmp(argv[i], "-E" ) == 0 ) {
-            error_rates = true ; 
+            error_rates = true ;
         }
         if ( strcmp(argv[i],"--ne") == 0 ) {
             ne = 2 * atof(argv[++i]) ;
@@ -205,12 +205,12 @@ void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
         if ( strcmp(argv[i],"-i") == 0 ) {
             input_file = string(argv[++i]) ;
         }
-        
-        /// sample file 
+
+        /// sample file
         if ( strcmp(argv[i],"-s") == 0 ) {
             sample_file = string(argv[++i]) ;
         }
-        
+
         if ( strcmp(argv[i],"-d") == 0 ) {
             minimum_distance = atof(argv[++i]) ;
         }
@@ -218,8 +218,9 @@ void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
             ancestral_fixed = true ;
         }
     }
-    
-    if ( input_file == "null" ) {
+
+    // switch off input file checking, as input now comes from R (!);
+  /*  if ( input_file == "null" ) {
         cerr << "\n\n\t\tERROR: must provide input file\n\n\t\t\t-i [path/to/input_file]\n\n" ;
         print_usage() ;
         exit(1) ;
@@ -229,10 +230,13 @@ void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
         print_usage() ;
         exit(1) ;
     }
+   */
+
+
     if ( ancestry_proportion.size() > ancestry_pulses.size() ) {
-	cerr << "\n\n\t\tERROR: insufficient ancestry pulses specified\n\n" ;
-	print_usage() ; 
-	exit(1) ; 
+      Rcpp::Rcout << "\n\n\t\tERROR: insufficient ancestry pulses specified\n\n" ;
+	    print_usage() ;
+	    exit(1) ;
     }
     return ;
 }

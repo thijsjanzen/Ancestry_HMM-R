@@ -37,7 +37,7 @@ vector<pulse> create_reflection ( vector<pulse> &centroid, vector<pulse> &worst,
 
 /// create expansion, contraction, etc
 vector<pulse> create_expansion ( vector<pulse> &centroid, vector<pulse> &worst, double &scale ) {
-    
+
     vector<pulse> expansion = centroid ;
     for ( int p = 0 ; p < centroid.size() ; p ++ ) {
         if ( centroid[p].time_fixed == false ) {
@@ -67,115 +67,115 @@ void random_restart( vector<vector<pulse> > &vertices, cmd_line &options ) {
 
 /// optimation via amoeba search
 vector<pulse> nelder_mead_search( vector<vector<pulse> > &vertices, cmd_line &options, vector<markov_chain> &markov_chain_information, map<int, vector<vector< map< vector<transition_information>, double > > > > &transition_matrix_information, vector<double> &recombination_rate, vector<int> &position, map<int,vector<vector<int> > > &state_changes ) {
-    
+
     /// amoeba search parameters
     double alpha = 1 ;
     double gamma = 2 ;
     double rho = 0.5 ;
     double sigma = 0.5 ;
-    
+
     /// record best optimum so far
     vector<pulse> best_optimum = vertices[0] ;
     double best_lnl = -1.7976931348623157E+308 ; // set initial best to minimum double value, if we underflow that, shiiittttt
-    
+
     for ( int r = 0 ; r < options.n_restarts+1 ; r ++ ) {
-    
+
         /// lnl of each vertex to be stored in vector
         vector<double> lnls (vertices.size(),0) ;
-    
+
         /// evaluate likelihood of initial points
         for ( int v = 0 ; v < vertices.size() ; v ++ ) {
             lnls[v] = evaluate_vertex( vertices[v], markov_chain_information, transition_matrix_information, recombination_rate, position, options, state_changes ) ;
         }
-        
+
         /// improvement in new position relative to old position both in lnl units
         int iteration = 0 ;
         while ( lnls[0]-lnls.back() > options.tolerance ) {
-            
-            cerr << r << "\t" << iteration << "\t" << lnls[0]-lnls.back() << "\t" ;
+
+            Rcpp::Rcout << r << "\t" << iteration << "\t" << lnls[0]-lnls.back() << "\t" ;
             iteration ++ ;
-            
-            cerr << endl ;
+
+            Rcpp::Rcout << endl ;
             for ( int v = 0 ; v < vertices.size() ; v ++ ) {
-                cerr << "\tvertex: " << v << "\t" << "lnl: " << lnls[v] << endl ;
+                Rcpp::Rcout << "\tvertex: " << v << "\t" << "lnl: " << lnls[v] << endl ;
                 for ( int p = 0 ; p < vertices[v].size() ; p ++ ) {
                     vertices[v][p].print() ;
                 }
             }
-            cerr << endl ;
-            
+            Rcpp::Rcout << endl ;
+
             /// create centroid and evaluate
             vector<pulse> centroid = create_centroid ( vertices ) ;
-            
+
             /// reflection point
             vector<pulse> reflection = create_reflection( centroid, vertices.back(), alpha ) ;
             check_vertex( reflection, options ) ;
             double lnl_reflection = evaluate_vertex( reflection, markov_chain_information, transition_matrix_information, recombination_rate, position, options, state_changes ) ;
-            
-            cerr << "\treflection\t" << "lnl: " << lnl_reflection << endl ;
+
+            Rcpp::Rcout << "\treflection\t" << "lnl: " << lnl_reflection << endl ;
             for ( int p = 0 ; p < reflection.size() ; p ++ ) {
                 reflection[p].print() ;
             }
-            cerr << endl ;
-            
+            Rcpp::Rcout << endl ;
+
             if ( lnl_reflection < lnls[0] && lnl_reflection > lnls[lnls.size()-2] ) {
-                cerr << "\t\t\t\tREFLECTION ACCEPTED\n" ;
+                Rcpp::Rcout << "\t\t\t\tREFLECTION ACCEPTED\n" ;
                 lnls.back() = lnl_reflection ;
                 vertices.back() = reflection ;
                 sort_vertices( vertices, lnls ) ;
                 continue ;
             }
-            
+
             /// expansion point
             else if ( lnl_reflection >= lnls[0] ) {
                 vector<pulse> expansion = create_expansion( centroid, reflection, gamma ) ;
                 check_vertex( expansion, options ) ;
                 double lnl_expansion = evaluate_vertex( expansion, markov_chain_information, transition_matrix_information, recombination_rate, position, options, state_changes ) ;
-                
-                cerr << "\texpansion\t" << "lnl: " << lnl_expansion << endl ;
+
+                Rcpp::Rcout << "\texpansion\t" << "lnl: " << lnl_expansion << endl ;
                 for ( int p = 0 ; p < expansion.size() ; p ++ ) {
                     expansion[p].print() ;
                 }
-                cerr << endl ;
-                
+                Rcpp::Rcout << endl ;
+
                 if ( lnl_expansion > lnl_reflection ) {
-                    cerr << "\t\t\t\tEXPANSION ACCEPTED\n" ;
+                    Rcpp::Rcout << "\t\t\t\tEXPANSION ACCEPTED\n" ;
                     lnls.back() = lnl_expansion ;
                     vertices.back() = expansion ;
                     sort_vertices( vertices, lnls ) ;
                     continue ;
                 }
                 else {
-                    cerr << "\t\t\t\tREFLECTION ACCEPTED\n" ;
+                    Rcpp::Rcout << "\t\t\t\tREFLECTION ACCEPTED\n" ;
                     lnls.back() = lnl_reflection ;
                     vertices.back() = reflection ;
                     sort_vertices( vertices, lnls ) ;
                     continue ;
                 }
             }
-            
+
             /// contraction
             vector<pulse> contraction = create_expansion( centroid, vertices.back(), rho ) ;
             check_vertex( contraction, options ) ;
             double lnl_contraction = evaluate_vertex( contraction, markov_chain_information, transition_matrix_information, recombination_rate, position, options, state_changes ) ;
-            
-            cerr << "\tcontraction\t" << "lnl: " << lnl_contraction << endl ;
+
+            Rcpp::Rcout << "\tcontraction\t" << "lnl: " << lnl_contraction << endl ;
             for ( int p = 0 ; p < contraction.size() ; p ++ ) {
                 contraction[p].print() ;
             }
-            cerr << endl ;
-            
+            Rcpp::Rcout << endl ;
+
             if ( lnl_contraction > lnls.back() ) {
-                cerr << "\t\t\t\tCONTRACTION ACCEPTED\n" ;
+                Rcpp::Rcout << "\t\t\t\tCONTRACTION ACCEPTED\n" ;
                 lnls.back() = lnl_contraction ;
                 vertices.back() = contraction ;
                 sort_vertices( vertices, lnls ) ;
                 continue ;
             }
-            
+
             /// shrink
             else {
-                cerr << "\t\t\t\tSHRINK ACCEPTED\n" ;
+                Rcpp::Rcout << "\t\t\t\tSHRINK ACCEPTED\n" ;
                 for ( int v = 1 ; v < vertices.size() ; v ++ ) {
                     vector<pulse> replacement = create_expansion( vertices[0], vertices[v], sigma ) ;
                     check_vertex( replacement, options ) ;
@@ -186,25 +186,25 @@ vector<pulse> nelder_mead_search( vector<vector<pulse> > &vertices, cmd_line &op
                 continue ;
             }
         }
-        
+
         if ( best_lnl < lnls[0] ) {
             best_optimum = vertices[0] ;
             best_lnl = lnls[0] ;
         }
-        
-        cerr << "restart: " << r << "\t" << lnls[0]-lnls.back() << endl ;
+
+        Rcpp::Rcout << "restart: " << r << "\t" << lnls[0]-lnls.back() << endl ;
         for ( int p = 0 ; p < vertices[0].size() ; p ++ ) {
             vertices[0][p].print() ;
         }
-        cerr << endl ;
-        
+        Rcpp::Rcout << endl ;
+
         random_restart( vertices, options ) ;
         for ( int v = 0 ; v < vertices.size() ; v++ ) {
             lnls[v] = evaluate_vertex( vertices[v], markov_chain_information, transition_matrix_information, recombination_rate, position, options, state_changes ) ;
         }
         sort_vertices( vertices, lnls ) ;
     }
-    
+
     /// sort points by lnl, with point 0 having highest lnl
     /// sort_vertices( vertices, lnls ) ;
     return best_optimum ;

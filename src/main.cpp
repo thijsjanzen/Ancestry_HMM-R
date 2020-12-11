@@ -22,15 +22,16 @@ using namespace std ;
 #define ARMA_NO_DEBUG
 #include "RcppArmadillo.h"
 using namespace arma ;
+using namespace Rcpp;
 
 #include <chrono>
 #include <thread>
 
 void force_output() {
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  R_FlushConsole();
-  R_ProcessEvents();
-  R_CheckUserInterrupt();
+//  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+ // R_FlushConsole();
+//  R_ProcessEvents();
+//  R_CheckUserInterrupt();
 }
 
 // forward declaration
@@ -76,26 +77,34 @@ Rcpp::NumericMatrix convert_double_vector(const std::vector< std::vector< double
 #include "golden_search.h"
 #include "bootstrap.h"
 
-using namespace Rcpp;
+
+
+pulse create_pulse(const Rcpp::NumericVector& p);
+
 
 // [[Rcpp::export]]
-Rcpp::List run_ancestry_hmm(const Rcpp::NumericMatrix& sample_matrix,
+Rcpp::List run_ancestry_hmm_cpp(const Rcpp::NumericMatrix& sample_matrix,
                             Rcpp::StringVector& cmd_line_options,
-                            const int num_options,
                             const Rcpp::NumericMatrix& genetic_data,
-                            bool viterbi) {
+                            bool viterbi,
+                            const Rcpp::NumericVector& pulse1,
+                            const Rcpp::NumericVector& pulse2,
+                            bool use_genome_data) {
 
   const int argc = cmd_line_options.size();
   char* argv[argc];
 
+  Rcout << argc << "\n"; force_output();
 
-  for(int i = 0; i < cmd_line_options.size(); ++i) {
-    std::string input = Rcpp::as<std::string>(cmd_line_options[i]);
-    const char* s = input.c_str();
-    std::size_t sz = std::strlen(s);
-    char *p = new char[sz];
-    std::strcpy(p, s);
-    argv[i] = p;
+  if (argc > 1) {
+    for(int i = 0; i < cmd_line_options.size(); ++i) {
+      std::string input = Rcpp::as<std::string>(cmd_line_options[i]);
+      const char* s = input.c_str();
+      std::size_t sz = std::strlen(s);
+      char *p = new char[sz];
+      std::strcpy(p, s);
+      argv[i] = p;
+    }
   }
 
   clock_t t = clock();
@@ -105,10 +114,23 @@ Rcpp::List run_ancestry_hmm(const Rcpp::NumericMatrix& sample_matrix,
   cmd_line options ;
   Rcout << "reading command line\n" ; t = clock(); force_output();
 
-  options.read_cmd_line( argc, &argv[0]) ;
+  options.read_cmd_line( argc, &argv[0]);
 
-  /// seed prng
-  srand (t) ;
+  if (argc <= 1) {
+    Rcout << "using manual entries\n"; force_output();
+    options.ancestry_pulses.clear() ;
+    // set pulses from numeric Vectors
+    pulse new_ancestry_pulse  = create_pulse(pulse1);
+
+    options.ancestry_pulses.push_back( new_ancestry_pulse ) ;
+    options.ancestry_pulses.back().entry_order = options.ancestry_pulses.size() - 1 ;
+
+    pulse new_ancestry_pulse2 = create_pulse(pulse2);
+    options.ancestry_pulses.push_back( new_ancestry_pulse2 ) ;
+    options.ancestry_pulses.back().entry_order = options.ancestry_pulses.size() - 1 ;
+
+    options.genotype = use_genome_data;
+  }
 
   /// chain objects for each sample
   vector<markov_chain> markov_chain_information ;
@@ -139,12 +161,6 @@ Rcpp::List run_ancestry_hmm(const Rcpp::NumericMatrix& sample_matrix,
   vector<int> position ;
   vector<double> recombination_rate ;
   vector<string> chromosomes ;
-  /*read_file( options,
-   markov_chain_information,
-   state_list,
-   position,
-   recombination_rate,
-   chromosomes ) ;*/
 
   read_file_r( options,
              markov_chain_information,
@@ -315,4 +331,32 @@ Rcpp::NumericMatrix convert_double_vector(const std::vector< std::vector< double
     }
   }
   return output;
+}
+
+pulse create_pulse(const Rcpp::NumericVector& p) {
+  pulse new_ancestry_pulse;
+  new_ancestry_pulse.type = p[1];
+  new_ancestry_pulse.time = p[2];
+  new_ancestry_pulse.proportion = p[3];
+
+  // if time is set, we are not estimating it
+  ///// set time with a negative number to provide the starting guess for this parameter
+  if ( new_ancestry_pulse.time > 0 ) {
+    new_ancestry_pulse.time_fixed = true ;
+  }
+  else {
+    new_ancestry_pulse.time = new_ancestry_pulse.time * -1 ;
+    new_ancestry_pulse.time_fixed = false ;
+  }
+
+  // if proporion is set, we are not estimating it
+  ////// set proporiton with a negative number to provide the starting guess for this parameter
+  if ( new_ancestry_pulse.proportion > 0 ) {
+    new_ancestry_pulse.proportion_fixed = true ;
+  }
+  else {
+    new_ancestry_pulse.proportion_fixed = false ;
+    new_ancestry_pulse.proportion = -1 * new_ancestry_pulse.proportion ;
+  }
+  return new_ancestry_pulse;
 }
