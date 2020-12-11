@@ -134,13 +134,13 @@ void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
             if ( sum < 0.9999 || sum > 1.0001 ) {
                 Rcpp::Rcout << "\n\n\t\t ERROR: ancestry proportions must sum to one\n\n" ;
                 print_usage() ;
-                exit(1) ;
+                Rcpp::stop("\n\n\t\t ERROR: ancestry proportions must sum to one\n\n");
             }
         }
 
         if ( strcmp(argv[i],"--help") == 0 ) {
             print_usage() ;
-            exit(1) ;
+          Rcpp::stop("");
         }
 
         if ( strcmp(argv[i],"-g") == 0 ) {
@@ -236,7 +236,7 @@ void cmd_line::read_cmd_line ( int argc, char *argv[] ) {
     if ( ancestry_proportion.size() > ancestry_pulses.size() ) {
       Rcpp::Rcout << "\n\n\t\tERROR: insufficient ancestry pulses specified\n\n" ;
 	    print_usage() ;
-	    exit(1) ;
+	    Rcpp::stop("\n\n\t\tERROR: insufficient ancestry pulses specified\n\n") ;
     }
     return ;
 }

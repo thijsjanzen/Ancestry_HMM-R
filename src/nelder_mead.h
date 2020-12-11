@@ -52,13 +52,18 @@ vector<pulse> create_expansion ( vector<pulse> &centroid, vector<pulse> &worst, 
 
 /// retstart nelder_mead with random simplex
 void random_restart( vector<vector<pulse> > &vertices, cmd_line &options ) {
+
+    std::random_device rd;
+    std::mt19937 rndgen(rd());
+    std::uniform_real_distribution<double> rand_dist(0, 1);
+
     for ( int v = 0 ; v < vertices.size() ; v ++ ) {
         for ( int p = 0 ; p < vertices[v].size() ; p ++ ) {
             if ( vertices[v][p].time_fixed == false ) {
-                vertices[v][p].time = options.t_min + rand()/((double)RAND_MAX) * ( options.t_max - options.t_min ) ;
+                vertices[v][p].time = options.t_min + rand_dist(rndgen) * ( options.t_max - options.t_min ) ;
             }
             if ( vertices[v][p].proportion_fixed == false ) {
-                vertices[v][p].fraction_of_remainder = options.p_min + rand()/((double)RAND_MAX) * ( options.p_max - options.p_min ) ;
+                vertices[v][p].fraction_of_remainder = options.p_min + rand_dist(rndgen) * ( options.p_max - options.p_min ) ;
             }
         }
         check_vertex( vertices[v], options ) ;

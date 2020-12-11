@@ -1,6 +1,8 @@
 #ifndef __BOOTSTRAP_H
 #define __BOOTSTRAP_H
 
+#include <random>
+
 /// create_bootstraps
 vector<vector<pulse> > bootstraps (vector<vector<pulse> > &vertices, vector<markov_chain> &markov_chain_information, map<int, vector<vector< map< vector<transition_information>, double > > > > &transition_matrix_information, vector<double> &recombination_rate, vector<int> &position, cmd_line &options, map<int,vector<vector<int> > > &state_list, vector<string> &chromosomes ) {
 
@@ -9,6 +11,10 @@ vector<vector<pulse> > bootstraps (vector<vector<pulse> > &vertices, vector<mark
 
     /// rng to select block positions
     int max = floor(recombination_rate.size()/ options.block_size) ;
+
+    std::random_device rd;
+    std::mt19937 rndgen(rd());
+    std::uniform_real_distribution<int> rand_dist(0, max);
 
     /// create b total bootstraps
     for ( int b = 0 ; b < options.n_bootstraps ; b ++ ) {
@@ -22,7 +28,8 @@ vector<vector<pulse> > bootstraps (vector<vector<pulse> > &vertices, vector<mark
         while ( bootstrap_positions.size() < position.size() ) {
 
             /// find admissable start positions
-            int start = ( rand() % max ) * options.block_size ;
+           // int start = ( rand() % max ) * options.block_size ;
+           int start = ( rand_dist(rndgen) ) * options.block_size ;
             int end = start + options.block_size ;
             if ( end > position.size() ) {
                 end = position.size() - 1 ;
