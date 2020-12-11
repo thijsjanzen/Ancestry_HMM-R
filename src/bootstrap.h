@@ -14,7 +14,7 @@ vector<vector<pulse> > bootstraps (vector<vector<pulse> > &vertices, vector<mark
 
     std::random_device rd;
     std::mt19937 rndgen(rd());
-    std::uniform_real_distribution<int> rand_dist(0, max);
+    std::uniform_real_distribution<float> rand_dist(0, max);
 
     /// create b total bootstraps
     for ( int b = 0 ; b < options.n_bootstraps ; b ++ ) {
@@ -29,7 +29,7 @@ vector<vector<pulse> > bootstraps (vector<vector<pulse> > &vertices, vector<mark
 
             /// find admissable start positions
            // int start = ( rand() % max ) * options.block_size ;
-           int start = ( rand_dist(rndgen) ) * options.block_size ;
+           int start = ( static_cast<int>(rand_dist(rndgen)) ) * options.block_size ;
             int end = start + options.block_size ;
             if ( end > position.size() ) {
                 end = position.size() - 1 ;
