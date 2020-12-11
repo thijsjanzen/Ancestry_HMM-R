@@ -5,6 +5,7 @@
 #' @return list with posterior probabilities, age estimate, and likelihood
 #' @rawNamespace useDynLib(ancestryhmmR)
 #' @rawNamespace import(Rcpp)
+#' @export
 junctions_to_anchmm <- function(sim_data) {
 
   # we need per line:
@@ -15,12 +16,11 @@ junctions_to_anchmm <- function(sim_data) {
 
   output_matrix <- matrix(NA, nrow = length(a1$time), ncol = 7 + 2 * num_indiv)
 
-  for(i in unique(sim_data$individual)) {
+  for (i in unique(sim_data$individual)) {
     focal_data <- subset(sim_data, sim_data$individual == i)
     testit::assert(length(focal_data$time) == nrow(output_matrix))
 
-    for(j in 1:length(focal_data$time)) {
-      pos <- focal_data$location[j] * 1e12
+    for (j in 1:length(focal_data$time)) {
       if (i == unique(sim_data$individual[1])) {
         output_matrix[j, 1] <- 1 # chrom
         output_matrix[j, 2] <- floor(focal_data$location[j] * 1e7)
@@ -31,7 +31,7 @@ junctions_to_anchmm <- function(sim_data) {
 
         recomdiff <- -1
         if (j > 1) {
-          recomdiff <- focal_data$location[j] - focal_data$location[j-1]
+          recomdiff <- focal_data$location[j] - focal_data$location[j - 1]
         }
 
         output_matrix[j, 7] <- recomdiff  # recompos

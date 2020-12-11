@@ -10,5 +10,7 @@ Description: More details about what the package does. See
            details on how to write this part.
 License: GPL (>= 3)
 Imports: Rcpp (>= 1.0.5)
+Suggests: junctions,
+          testthat
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.1.1
