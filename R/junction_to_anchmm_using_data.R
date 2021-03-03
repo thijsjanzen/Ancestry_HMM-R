@@ -1,3 +1,10 @@
+get_emp_data_entry <- function(rel_pos, rel_emp_pos) {
+  a <- max(which(rel_emp_pos < rel_pos))
+  return(a)
+}
+
+
+
 #' converts output from simulations of the junctions package to input for
 #' Ancestry_HMM
 #' @param sim_data  output from junctions::sim_phased_unphased
@@ -11,7 +18,12 @@ junctions_to_anchmm_using_data <- function(sim_data,
   # chrom, pos, A_1, a_1, A_2, a_2, recomdiff, A_indiv1, a_indiv1, A_indiv2 etc
   num_indiv <- length(unique(sim_data$individual))
 
-  indices_emp_data <- seq_along(emp_data$V1)
+  rel_emp_pos <- emp_data$V2
+  min_pos <- min(rel_emp_pos)
+  max_pos <- max(rel_emp_pos)
+  rel_emp_pos <- (rel_emp_pos - min_pos) /
+                    (max_pos - min_pos)
+
 
   a1 <- subset(sim_data, sim_data$individual == unique(sim_data$individual)[1])
 
@@ -20,13 +32,18 @@ junctions_to_anchmm_using_data <- function(sim_data,
   for (i in unique(sim_data$individual)) {
     focal_data <- subset(sim_data, sim_data$individual == i)
     testit::assert(length(focal_data$time) == nrow(output_matrix))
+    size_chrom <- 10000 / min(focal_data$location)
 
-    for (j in 1:length(focal_data$time)) {
-      emp_data_entry <- emp_data[ sample(indices_emp_data, 1), ]
+    for (j in 1:length(focal_data$anc_chrom_1)) {
+
+      location <- focal_data$location[j]
+      testit::assert(location <= 1)
+      emp_data_index <-  get_emp_data_entry(location, rel_emp_pos)
+      emp_data_entry <-  emp_data[emp_data_index, ]
 
       if (i == unique(sim_data$individual[1])) {
         output_matrix[j, 1] <- 1 # chrom
-        output_matrix[j, 2] <- floor(focal_data$location[j] * 1e7)
+        output_matrix[j, 2] <- floor(focal_data$location[j] * size_chrom)
         output_matrix[j, 3] <- emp_data_entry[[3]]
         output_matrix[j, 4] <- emp_data_entry[[4]] # a_1
         output_matrix[j, 5] <- emp_data_entry[[5]] # A_2
