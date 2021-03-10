@@ -68,6 +68,7 @@ get_alleles <- function(d_value) {
 #' discriminatory value is given by: p_A / (p_A + p_a), e.g. the d value
 #' indicates the probability of getting the ancestry right.
 #' @return list with posterior probabilities, age estimate, and likelihood
+#' @export
 junctions_to_anchmm_imperfect <- function(sim_data,
                                           d_value) {
 
