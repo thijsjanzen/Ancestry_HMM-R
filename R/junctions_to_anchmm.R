@@ -50,11 +50,8 @@ junctions_to_anchmm <- function(sim_data) {
 
 get_alleles <- function(d_value) {
 
-  d <- rnorm(n = 1, mean = d_value, sd = 0.05)
-  if (d > 1) d = 1
-
-  px <- runif(n = 1, min = d, max = 1)
-  py <- px - d
+  px <- runif(n = 1, min = d_value, max = 1)
+  py <- px - d_value
 
   # now that we have px and py, we only have to create the associated
   # alleles

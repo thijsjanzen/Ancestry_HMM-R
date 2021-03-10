@@ -6,11 +6,6 @@
 
 using namespace Rcpp;
 
-#ifdef RCPP_USE_GLOBAL_ROSTREAM
-Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
-Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
-#endif
-
 // run_ancestry_hmm_cpp
 Rcpp::List run_ancestry_hmm_cpp(const Rcpp::NumericMatrix& sample_matrix, Rcpp::StringVector& cmd_line_options, const Rcpp::NumericMatrix& genetic_data, bool viterbi, const Rcpp::NumericVector& pulse1, const Rcpp::NumericVector& pulse2, const Rcpp::NumericVector& ancestry_proportions, bool use_genome_data);
 RcppExport SEXP _ancestryhmmR_run_ancestry_hmm_cpp(SEXP sample_matrixSEXP, SEXP cmd_line_optionsSEXP, SEXP genetic_dataSEXP, SEXP viterbiSEXP, SEXP pulse1SEXP, SEXP pulse2SEXP, SEXP ancestry_proportionsSEXP, SEXP use_genome_dataSEXP) {

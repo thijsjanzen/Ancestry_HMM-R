@@ -3,8 +3,6 @@ get_emp_data_entry <- function(rel_pos, rel_emp_pos) {
   return(a)
 }
 
-
-
 #' converts output from simulations of the junctions package to input for
 #' Ancestry_HMM
 #' @param sim_data  output from junctions::sim_phased_unphased
@@ -76,7 +74,7 @@ sample_from_emp <- function(emp_data_entry, genotype) {
   allele_dist <- list(c(emp_data_entry[[3]], emp_data_entry[[4]]),
                       c(emp_data_entry[[5]], emp_data_entry[[6]]))
   alleles <- c(0, 0) # options:  0 2  //  1 1 // 2 0
-  for(i in 1:2) {
+  for (i in 1:2) {
     prob_alleles <- allele_dist[[ 1 + genotype[i]]]
     chosen_allele <- sample(x = 1:2, size = 1, prob = prob_alleles)
     alleles[chosen_allele] <- alleles[chosen_allele] + 1
